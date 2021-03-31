@@ -1,0 +1,2 @@
+﻿Prism 的 Region 使用方式。
+https://dzone.com/articles/wpf-prism-concepts-regions

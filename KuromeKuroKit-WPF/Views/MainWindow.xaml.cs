@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using Prism.Regions;
+using System.Windows;
+using Prism.DryIoc;
+using Prism.Ioc;
+using System;
 
 namespace KuromeKuroKit_WPF.Views
 {
@@ -7,9 +11,50 @@ namespace KuromeKuroKit_WPF.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private readonly IRegionManager regionManager;
+        private readonly IContainerExtension container; //IContainerProvider
+        
+        //private readonly SettingsView settingsView;
+        //private readonly AboutView aboutView;
+        //private readonly IRegion mainRegion;
+
+        public MainWindow(IRegionManager regionManager, Prism.Ioc.IContainerExtension container)
         {
             InitializeComponent();
+
+            if (regionManager == null) 
+            {
+
+            }
+            if (container == null)
+            {
+
+            }
+
+            this.regionManager = regionManager;
+            this.container = container;
+
+            
+
+
+            
+            //mainRegion.Activate(mainRegion.GetView("AboutView"));
+            //mainRegion.Add(aboutView);
+            //mainRegion.Add(settingsView);
+
+            // string mainRegion = "MainRegion";
+            // regionManager.RegisterViewWithRegion(mainRegion, typeof(SettingsView));
+            // regionManager.RegisterViewWithRegion(mainRegion, typeof(AboutView));
+
+        }
+
+        protected override void OnContentRendered(EventArgs e)
+        {
+            base.OnContentRendered(e);
+
+            var mainRegion = regionManager.Regions["MainRegion"];
+            mainRegion.RequestNavigate("AboutView");
+            
         }
     }
 }

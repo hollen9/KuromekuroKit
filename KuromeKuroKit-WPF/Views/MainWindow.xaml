@@ -13,8 +13,27 @@
     lex:ResxLocalizationProvider.DefaultDictionary="Strings"
     prism:ViewModelLocator.AutoWireViewModel="True">
     <Grid Margin="5">
-        <!--<ContentControl prism:RegionManager.RegionName="ContentRegion" />-->
+        <!--  https://dzone.com/articles/wpf-prism-concepts-regions  -->
         <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <Button
+                Command="{Binding NavigateCommand}"
+                CommandParameter="SettingsView"
+                Content="1" />
+            <Button
+                Command="{Binding NavigateCommand}"
+                CommandParameter="AboutView"
+                Content="2" />
+            <Button Content="3" />
+        </StackPanel>
+        <ContentControl Grid.Row="1" prism:RegionManager.RegionName="{StaticResource mainRegionName}" />
+        <!--<Grid.RowDefinitions>
             <RowDefinition Height="20" />
             <RowDefinition Height="20" />
             <RowDefinition />
@@ -25,7 +44,9 @@
             <ColumnDefinition Width="60" />
             <ColumnDefinition Width="60" />
         </Grid.ColumnDefinitions>
+        -->
         <!--#region CSGO Root Dir-->
+        <!--
         <Label
             x:Name="lblCSGORootDir"
             Grid.Row="0"
@@ -42,8 +63,10 @@
             Grid.Column="2"
             Command="{Binding BrowseCSGORootCommand}"
             Content="{lex:Loc _Word_Browse}" />
+        -->
         <!--#endregion-->
         <!--#region Player MDL Path-->
+        <!--
         <Label
             x:Name="lblPlayerMdlPath"
             Grid.Row="1"
@@ -60,10 +83,12 @@
             Grid.Column="2"
             Command="{Binding BrowsePlayerMdlCommand}"
             Content="{lex:Loc _Word_Browse}" />
+        -->
         <!--#endregion-->
 
 
         <!--#region Log-->
+        <!--
         <TextBox
             Grid.Row="2"
             Grid.Column="1"
@@ -71,6 +96,7 @@
             AcceptsTab="True"
             Text="{Binding LogMessage}"
             TextWrapping="Wrap" />
+        -->
         <!--#endregion-->
 
     </Grid>
