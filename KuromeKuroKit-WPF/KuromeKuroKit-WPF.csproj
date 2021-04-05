@@ -57,14 +57,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Modules\MainViewModule.cs" />
-    <Compile Include="ViewModels\SettingsUserControlViewModel.cs" />
+    <Compile Include="Helpers\TypeHelper.cs" />
+    <Compile Include="Models\ProfileInfo.cs" />
+    <Compile Include="Modules\MainSubModule.cs" />
+    <Compile Include="Names.cs" />
+    <Compile Include="Models\UserProfile.cs" />
+    <Compile Include="Singletons\AppState.cs" />
+    <Compile Include="ViewModels\SettingsSubViewModel.cs" />
+    <Compile Include="ViewModels\AboutSubViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
-    <Compile Include="Views\AboutView.xaml.cs">
-      <DependentUpon>AboutView.xaml</DependentUpon>
+    <Compile Include="Views\AboutSub.xaml.cs">
+      <DependentUpon>AboutSub.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SettingsView.xaml.cs">
-      <DependentUpon>SettingsView.xaml</DependentUpon>
+    <Compile Include="Views\SettingsSub.xaml.cs">
+      <DependentUpon>SettingsSub.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -86,11 +92,11 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\AboutView.xaml">
+    <Page Include="Views\AboutSub.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\SettingsView.xaml">
+    <Page Include="Views\SettingsSub.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -132,6 +138,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MahApps.Metro">
+      <Version>2.4.4</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.1</Version>
+    </PackageReference>
     <PackageReference Include="Ookii.Dialogs.Wpf">
       <Version>3.1.0</Version>
     </PackageReference>
@@ -151,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="Views\Dialogs\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

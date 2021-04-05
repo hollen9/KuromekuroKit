@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace KuromeKuroKit_WPF.Modules
 {
-    public class MainViewModule : IModule
+    public class MainSubModule : IModule
     {
         public void OnInitialized(IContainerProvider containerProvider)
         {
@@ -17,8 +17,8 @@ namespace KuromeKuroKit_WPF.Modules
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.AboutView>();
-            containerRegistry.RegisterForNavigation<Views.SettingsView>();
+            containerRegistry.RegisterForNavigation<Views.AboutSub>();
+            containerRegistry.RegisterForNavigation<Views.SettingsSub>();
         }
     }
 }

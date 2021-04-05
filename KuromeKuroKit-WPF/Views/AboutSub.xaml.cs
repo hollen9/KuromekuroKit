@@ -5,9 +5,9 @@ namespace KuromeKuroKit_WPF.Views
     /// <summary>
     /// Interaction logic for SettingsUserControl
     /// </summary>
-    public partial class AboutView : UserControl
+    public partial class AboutSub : UserControl
     {
-        public AboutView()
+        public AboutSub()
         {
             InitializeComponent();
         }

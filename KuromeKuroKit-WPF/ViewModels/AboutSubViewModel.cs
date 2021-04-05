@@ -6,11 +6,11 @@ using System.Linq;
 
 namespace KuromeKuroKit_WPF.ViewModels
 {
-    public class SettingsUserControlViewModel : BindableBase
+    public class AboutSubViewModel : BindableBase
     {
-        public SettingsUserControlViewModel()
+        public AboutSubViewModel()
         {
-
+            System.Windows.MessageBox.Show("AboutSubViewModel");
         }
     }
 }

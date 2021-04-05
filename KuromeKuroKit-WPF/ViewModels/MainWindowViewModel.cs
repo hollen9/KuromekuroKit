@@ -1,7 +1,10 @@
-﻿using Prism.Commands;
+﻿using KuromeKuroKit_WPF.Singletons;
+using MahApps.Metro.Controls.Dialogs;
+using Prism.Commands;
 using Prism.Ioc;
 using Prism.Mvvm;
 using Prism.Regions;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,150 +14,90 @@ namespace KuromeKuroKit_WPF.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public MainWindowViewModel(IContainerExtension containerProvider) : base(containerProvider) 
+        public MainWindowViewModel(IContainerExtension containerProvider) : base(containerProvider)
         {
-            
+            mahDialogCoordinator = containerProvider.Resolve<IDialogCoordinator>();
+            appState = containerProvider.Resolve<AppState>();
         }
 
         private string title = "KuromeKuro Kit";
-        private string logMsg;
+        private readonly IDialogCoordinator mahDialogCoordinator;
+        private readonly AppState appState;
 
-        public string Title
+        public string Title { get => title; set => SetProperty(ref title, value); }
+        public ICommand NavigateCommand => new DelegateCommand<string>((path) =>
         {
-            get { return title; }
-            set { SetProperty(ref title, value); }
-        }
-
-        public string LogMessage
-        {
-            get { return logMsg; }
-            set { SetProperty(ref logMsg, value); }
-        }
-
-        public string CSGORootFolder { get => csgoRootFolder; set => SetProperty(ref csgoRootFolder, value); }
-        //public string PlayerMdlInputPath { get => playerMdlInputPath; set => SetProperty(ref playerMdlInputPath, value); }
-
-        public ICommand NavigateCommand => new DelegateCommand<string>((path)=> 
-        {
-            if (path != null) 
+            if (path != null)
             {
                 regionManager.RequestNavigate(resourceDictionary["mainRegionName"] as string, path);
             }
         });
 
-        public ICommand ShowSettingsViewCommand => new DelegateCommand(()=> 
+        public ICommand ExitCommand => new DelegateCommand(async () =>
         {
-            mainRegion.Activate(settingsView);
-            mainRegion.Deactivate(aboutView);
-
-            // var settingsView = regionManager.Regions["MainRegion"].GetView(typeof(Views.SettingsView).Name);
-            // var aboutView = regionManager.Regions["MainRegion"].GetView(typeof(Views.AboutView).Name);
-
-            //regionManager.Regions["MainRegion"].Deactivate(aboutView);
-            //regionManager.Regions["MainRegion"].Activate(settingsView);
-        });
-        public ICommand ShowAboutViewCommand => new DelegateCommand(() =>
-        {
-            mainRegion.Activate(aboutView);
-            mainRegion.Deactivate(settingsView);
-
-            //var settingsView = regionManager.Regions["MainRegion"].GetView(typeof(Views.SettingsView).Name);
-            //var aboutView = regionManager.Regions["MainRegion"].GetView(typeof(Views.AboutView).Name);
-
-            //regionManager.Regions["MainRegion"].Activate(aboutView);
-            //regionManager.Regions["MainRegion"].Deactivate(settingsView);
-        });
-
-        public ICommand BrowseCSGORootCommand => new DelegateCommand(() =>
-        {
-            do
+            try
             {
-                var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
-                bool? dialogR = dialog.ShowDialog();
-                if (!dialogR.HasValue)
+                var mahMsgPromptResult = await mahDialogCoordinator.ShowMessageAsync(this, "State saving",
+                "_您正要關閉應用程式，請問你想要保存設定嗎?", MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary,
+                new MetroDialogSettings
                 {
-                    MessageBox.Show(Strings._Msg_AnErrorOccurred);
-                    return;
-                }
-                if (dialogR.Value)
+                    FirstAuxiliaryButtonText = "_取消",
+                    AffirmativeButtonText = "_保存並離開",
+                    NegativeButtonText = "_直接離開",
+                    DefaultButtonFocus = MessageDialogResult.Affirmative,
+                    DialogResultOnCancel = MessageDialogResult.FirstAuxiliary
+                });
+
+                switch (mahMsgPromptResult)
                 {
-                    string assumingPath = dialog.SelectedPath;
-                    if (!File.Exists(Path.Combine(assumingPath, "csgo.exe")))
-                    {
-                        MessageBox.Show(Strings._Msg_CSGONotFounded);
-                        continue;
-                    }
-                    CSGORootFolder = assumingPath;
+                    case MessageDialogResult.Negative:
+                        Application.Current.Shutdown(); 
+                        return;
+                    default:
+                    case MessageDialogResult.Affirmative:
+                        if (!appState.SaveAppState())
+                        {
+                            var isOk = await mahDialogCoordinator.ShowMessageAsync(this, "State saving",
+                                "_app.json 儲存失敗，應用程式將關閉但不儲存。", MessageDialogStyle.AffirmativeAndNegative
+                                , settings: new MetroDialogSettings()
+                                {
+                                    AnimateHide = false,
+                                    ColorScheme = MetroDialogColorScheme.Inverted
+                                });
+                            if (isOk == MessageDialogResult.Negative)
+                            {
+                                return;
+                            }
+                        }
+                        if (!appState.SaveUsingUserProfile())
+                        {
+                            var isOk = await mahDialogCoordinator.ShowMessageAsync(this, "State saving",
+                                "_使用者設定儲存失敗，應用程式將關閉但不儲存。", settings:
+                                new MetroDialogSettings()
+                                {
+                                    ColorScheme = MetroDialogColorScheme.Inverted
+                                });
+                            if (isOk == MessageDialogResult.Negative)
+                            {
+                                return;
+                            }
+                        }
+                        Application.Current.Shutdown();
+                        return;
+                    case MessageDialogResult.FirstAuxiliary:
+                        return;
                 }
-                break;
-            } while (true);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("ExitCommand Error", ex.ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                Application.Current.Shutdown();
+            }
         });
 
-        //public ICommand BrowsePlayerMdlCommand => new DelegateCommand(() =>
-        //{
-        //    do
-        //    {
-        //        var dialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
-        //        dialog.Multiselect = false;
-        //        bool? dialogR = dialog.ShowDialog();
-        //        if (!dialogR.HasValue)
-        //        {
-        //            MessageBox.Show(Strings._Msg_AnErrorOccurred);
-        //            return;
-        //        }
-        //        if (dialogR.Value)
-        //        {
-        //            string assumingPath = dialog.FileName;
-        //            PlayerMdlInputPath = assumingPath;
-        //        }
-        //        break;
-        //    } while (true);
-        //});
-
-        private bool isDecompiledCompleted;
-        private string csgoRootFolder;
-        private readonly Views.SettingsView settingsView;
-        private readonly Views.AboutView aboutView;
-        private readonly IRegion mainRegion;
-        //private string playerMdlInputPath;
-
-        //public MainWindowViewModel() : base(null, null)
-        //{
-        //isDecompiledCompleted = false;
-
-        //var cbApp = new Crowbar.App();
-        //Crowbar.Decompiler cbDe = new Crowbar.Decompiler();
-
-        //cbDe.CrowbarApp = cbApp;
-        //cbApp.Settings = new Crowbar.AppSettings();
-        //cbApp.Settings.SetDefaultDecompileReCreateFilesOptions();
-        //cbApp.Settings.DecompileMdlPathFileName = @"J:\Output\DOTNET_TEST_HOMURA\.COMPILED\models\player\custom_player\legacy\kuromekuro\homura\homura.mdl";
-        //cbApp.Settings.DecompileOutputFolderOption = Crowbar.AppEnums.DecompileOutputPathOptions.WorkFolder;
-        //cbApp.Settings.DecompileOutputFullPath = @"J:\Output\dotnet";
-
-        //cbDe.ProgressChanged += (s, e) => 
-        //{
-        //    LogMessage = e.ProgressPercentage + "% ..\r\n" + LogMessage;
-        //};
-
-        //cbDe.RunWorkerCompleted += (s, e) =>
-        //{
-        //    LogMessage = "Completed! Result: " + e.Result.ToString() + " #\r\n" + LogMessage;
-        //    isDecompiledCompleted = true;
-        //};
-
-        //cbDe.Run();
-
-        //Task.Run(() => 
-        //{
-        //    while (!isDecompiledCompleted) 
-        //    {
-        //        Task.Delay(1000);
-        //    }
-        //    MessageBox.Show("Completed!");
-        //});
-        //}
-
-
+        public async Task InitializeAsync()
+        {
+            appState.Initialize();
+        }
     }
 }

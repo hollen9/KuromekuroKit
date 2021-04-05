@@ -1,22 +1,31 @@
-﻿<Window
+﻿<mah:MetroWindow
     x:Class="KuromeKuroKit_WPF.Views.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:lex="http://wpflocalizeextension.codeplex.com"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mdlg="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:prop="clr-namespace:KuromeKuroKit_WPF.Properties"
     Title="{Binding Title}"
-    Width="525"
-    Height="350"
+    Width="700"
+    Height="450"
+    MinWidth="600"
+    MinHeight="350"
     lex:LocalizeDictionary.DesignCulture="zh-TW"
     lex:ResxLocalizationProvider.DefaultAssembly="KuromeKuroKit-WPF"
     lex:ResxLocalizationProvider.DefaultDictionary="Strings"
-    prism:ViewModelLocator.AutoWireViewModel="True">
+    prism:ViewModelLocator.AutoWireViewModel="False"
+    Initialized="Window_Initialized">
+    <!--
+        Loaded="Window_Loaded"
+    -->
     <Grid Margin="5">
         <!--  https://dzone.com/articles/wpf-prism-concepts-regions  -->
         <Grid.RowDefinitions>
             <RowDefinition Height="20" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="10" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -24,13 +33,12 @@
         <StackPanel Orientation="Horizontal">
             <Button
                 Command="{Binding NavigateCommand}"
-                CommandParameter="SettingsView"
-                Content="1" />
+                CommandParameter="SettingsSub"
+                Content="基本設定" />
             <Button
                 Command="{Binding NavigateCommand}"
-                CommandParameter="AboutView"
-                Content="2" />
-            <Button Content="3" />
+                CommandParameter="AboutSub"
+                Content="檢查更新" />
         </StackPanel>
         <ContentControl Grid.Row="1" prism:RegionManager.RegionName="{StaticResource mainRegionName}" />
         <!--<Grid.RowDefinitions>
@@ -98,6 +106,7 @@
             TextWrapping="Wrap" />
         -->
         <!--#endregion-->
-
+        <UserControl mdlg:DialogParticipation.Register="{Binding}" />
     </Grid>
-</Window>
+
+</mah:MetroWindow>
