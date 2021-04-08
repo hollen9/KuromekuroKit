@@ -40,7 +40,7 @@
             Grid.Column="1"
             DisplayMemberPath="Name"
             ItemsSource="{Binding ProfileInfos}"
-            SelectedValue="{Binding UsingProfileInfo}"
+            SelectedItem="{Binding UsingProfileInfo}"
             SelectionChanged="cbUserProfile_SelectionChanged" />
         <!--
         -->

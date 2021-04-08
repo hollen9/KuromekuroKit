@@ -352,10 +352,11 @@ namespace KuromeKuroKit_WPF.Singletons
                 readFromFile.ProfileName = newName;
                 string writeToFile = Newtonsoft.Json.JsonConvert.SerializeObject(readFromFile);
                 File.WriteAllText(newFilePath, writeToFile);
+
                 UsingProfile.ProfileName = newName;
                 usingProfileName = newName;
-
-                OnFoundedProfileInfosChanged();
+                FindProfileInfos();
+                OnUsingProfileChanged();
                 return true;
             }
             catch (Exception ex)

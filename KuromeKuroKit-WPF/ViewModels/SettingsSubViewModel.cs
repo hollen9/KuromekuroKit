@@ -171,9 +171,9 @@ namespace KuromeKuroKit_WPF.ViewModels
                     }
                     //Succeed ranaming then...
 
-                    UsingProfileInfo.Filename = appState.UsingProfileInfo.Filename;
-                    UsingProfileInfo.Name = appState.UsingProfileInfo.Name;
-                    RaisePropertyChanged("UsingProfileInfo");
+                    //UsingProfileInfo.Filename = appState.UsingProfileInfo.Filename;
+                    //UsingProfileInfo.Name = appState.UsingProfileInfo.Name;
+                    // RaisePropertyChanged("UsingProfileInfo");
 
                     //int idx = ProfileInfos.Select((v,i)=> new
                     //{
