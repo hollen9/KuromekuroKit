@@ -8,13 +8,40 @@ namespace KuromeKuroKit_WPF.Singletons
 {
     public class UserProfile
     {
-        public string ProfileName { get; set; }
-        public string CSGOGameDir { get; set; }
-        public string LanguageCode { get; set; }
+        private string profileName;
+        private string cSGOGameDir;
+        private string languageCode;
+
+        public string ProfileName
+        {
+            get => profileName; set
+            {
+                profileName = value;
+                isChangesNotSaved = true;
+            }
+        }
+        public string CSGOGameDir
+        {
+            get => cSGOGameDir; set
+            {
+                cSGOGameDir = value;
+                isChangesNotSaved = true;
+            }
+        }
+        public string LanguageCode
+        {
+            get => languageCode; set
+            {
+                languageCode = value;
+                isChangesNotSaved = true;
+            }
+        }
+
+        private bool isChangesNotSaved;
 
         public static UserProfile GetDefaultProfile()
         {
-            var p = new UserProfile 
+            var p = new UserProfile
             {
                 ProfileName = "default",
                 LanguageCode = "system"

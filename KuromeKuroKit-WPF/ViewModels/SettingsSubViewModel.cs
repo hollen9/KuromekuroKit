@@ -27,12 +27,26 @@ namespace KuromeKuroKit_WPF.ViewModels
             ProfileInfos = new ObservableCollection<ProfileInfo>(appState.FoundedProfileInfos);
             ProfileInfos.Insert(0, new ProfileInfo { Filename = null, Name = "Add new..." });
 
-            UsingProfileInfo = ProfileInfos.Where(x => x.Filename == appState.UsingProfileInfo.Filename).FirstOrDefault();
+
+            UsingProfileInfo = appState.UsingProfile == null ? null :
+                ProfileInfos.Where(x => x.Filename == appState.UsingProfileInfo.Filename).FirstOrDefault();
             //if (UsingProfileInfo == null && ProfileInfos.Count == 1)
             //{
             //    ProfileInfos.Add(appState.UsingProfileInfo);
             //    UsingProfileInfo = ProfileInfos[1];
             //}
+
+            appState.FoundedProfileInfosChanged += (s, e) =>
+            {
+                ProfileInfos = new ObservableCollection<ProfileInfo>(appState.FoundedProfileInfos);
+                UsingProfileInfo = ProfileInfos[appState.UsingProfileInfoIndex];
+                ProfileInfos.Insert(0, new ProfileInfo { Filename = null, Name = "Add new..." });
+            };
+            appState.UsingProfileChanged += (s, e) =>
+            {
+                ProfileInfos = new ObservableCollection<ProfileInfo>(appState.FoundedProfileInfos);
+                UsingProfileInfo = ProfileInfos[appState.UsingProfileInfoIndex];
+            };
         }
 
         protected override void OnPropertyChanged(PropertyChangedEventArgs args)
@@ -41,7 +55,7 @@ namespace KuromeKuroKit_WPF.ViewModels
 
             if (isInitialized)
             {
-                if (args.PropertyName == "UsingProfileInfo")
+                if (!isCreatingProfile && args.PropertyName == "UsingProfileInfo")
                 {
                     if (UsingProfileInfo != null && UsingProfileInfo.Filename != null)
                     {
@@ -63,17 +77,20 @@ namespace KuromeKuroKit_WPF.ViewModels
         private readonly IDialogCoordinator mahDialogCoordinator;
         private readonly AppState appState;
 
+        private bool isCreatingProfile = false;
+
         public async Task InitializeAsync()
         {
-            
+
 
             isInitialized = true;
         }
 
-        public ObservableCollection<ProfileInfo> ProfileInfos { get => profileInfos; set => profileInfos = value; }
+        public ObservableCollection<ProfileInfo> ProfileInfos { get => profileInfos; set => SetProperty(ref profileInfos, value); }
         public ProfileInfo UsingProfileInfo { get => usingProfileInfo; set => SetProperty(ref usingProfileInfo, value); }
 
         public string CSGORootFolder { get => csgoRootFolder; set => SetProperty(ref csgoRootFolder, value); }
+
         //public string PlayerMdlInputPath { get => playerMdlInputPath; set => SetProperty(ref playerMdlInputPath, value); }
 
 
@@ -103,17 +120,35 @@ namespace KuromeKuroKit_WPF.ViewModels
             } while (true);
         });
 
+        public ICommand DeleteProfileCommand => new DelegateCommand<string>(async profileName => 
+        {
+            if (ProfileInfos.Count >= 2)
+            {
+                bool result = appState.DeleteUserProfile(profileName);
+            }
+            else
+            {
+                MessageBox.Show("無法刪除最後一個 Profile。");
+            }
+        });
+
         public ICommand SaveProfileCommand => new DelegateCommand<string>(async profileName =>
         {
             // MessageBox.Show(profileName);
             await mahDialogCoordinator.ShowMessageAsync(this, "Header", profileName);
         });
 
-        public ICommand RenameProfileCommand => new DelegateCommand<string>(async name => 
+        public ICommand RenameProfileCommand => new DelegateCommand(async () =>
         {
             do
             {
-                var mahInputResult = await mahDialogCoordinator.ShowInputAsync(this, "_Rename user profile", "_Input a new name for it.");
+                var mahInputResult = await mahDialogCoordinator.ShowInputAsync(this,
+                    "_Rename user profile",
+                    "_Input a new name for it.",
+                    settings: new MetroDialogSettings
+                    {
+                        DefaultText = UsingProfileInfo.Name
+                    });
                 if (mahInputResult == null)
                 {
                     // Cancel.
@@ -136,17 +171,43 @@ namespace KuromeKuroKit_WPF.ViewModels
                     }
                     //Succeed ranaming then...
 
-                    
                     UsingProfileInfo.Filename = appState.UsingProfileInfo.Filename;
                     UsingProfileInfo.Name = appState.UsingProfileInfo.Name;
+                    RaisePropertyChanged("UsingProfileInfo");
+
+                    //int idx = ProfileInfos.Select((v,i)=> new
+                    //{
+                    //    o = v,
+                    //    Index = i
+                    //}).First(x=>x.o.Name == UsingProfileInfo.Name).Index;
+                    //ProfileInfos[idx].Name = UsingProfileInfo.Name;
+                    //ProfileInfos[idx].Filename = UsingProfileInfo.Filename;
+
+
                 }
 
                 break;
             } while (true);
         });
 
-        public ICommand NewProfileCommand => new DelegateCommand(async () => 
+        public ICommand NewProfileCommand => new DelegateCommand(async () =>
         {
+            isCreatingProfile = true;
+            //if (appState.UsingProfile != null && appState.UsingProfile.IsChangesNotSaved)
+            //{
+            //    var mahPromptResult = await mahDialogCoordinator.ShowMessageAsync(this,
+            //        "_Unsaved changes",
+            //        "有為儲存的變更，在創建之前要儲存嗎?", MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary,
+            //        new MetroDialogSettings 
+            //        {
+            //            FirstAuxiliaryButtonText = "_取消",
+            //            AffirmativeButtonText = "_儲存並創建",
+            //            NegativeButtonText = "_刪除舊的創建新的",
+            //            DefaultButtonFocus = MessageDialogResult.Affirmative,
+            //            DialogResultOnCancel = MessageDialogResult.FirstAuxiliary
+            //        });
+            //}
+
             do
             {
                 var mahInputResult = await mahDialogCoordinator.ShowInputAsync(this, "_New user profile", "_Input a name for it.");
@@ -164,24 +225,29 @@ namespace KuromeKuroKit_WPF.ViewModels
                 }
                 else
                 {
-                    if (ProfileInfos.Any(x=>x.Name == newProfileName))
+                    if (ProfileInfos.Any(x => x.Name == newProfileName))
                     {
                         _ = await mahDialogCoordinator.ShowMessageAsync(this, "_Error", "Provided name aleady exists!");
                         continue;
                     }
-                    var newPI = new ProfileInfo { Name = newProfileName, Filename = newProfileName };
 
-                    ProfileInfos.Add(newPI);
-                    UsingProfileInfo = newPI;
-                    var oriUP = appState.UsingProfile;
-                    var newUP = UserProfile.GetDefaultProfile();
-                    newUP.CopyFrom(oriUP);
-                    newUP.ProfileName = newPI.Name;
-                    appState.UsingProfile = newUP;
+                    _ = appState.CreateNewProfile(newProfileName);
+
+                    //var newPI = new ProfileInfo { Name = newProfileName, Filename = newProfileName };
+
+                    //ProfileInfos.Add(newPI);
+                    //UsingProfileInfo = newPI;
+                    //var oriUP = appState.UsingProfile;
+                    //var newUP = UserProfile.GetDefaultProfile();
+                    //newUP.CopyFrom(oriUP);
+                    //newUP.ProfileName = newPI.Name;
+                    //appState.UsingProfile = newUP;
                 }
 
                 break;
             } while (true);
+
+            isCreatingProfile = false;
         });
 
         //public ICommand BrowsePlayerMdlCommand => new DelegateCommand(() =>

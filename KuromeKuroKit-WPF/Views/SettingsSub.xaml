@@ -54,7 +54,6 @@
             Grid.Row="0"
             Grid.Column="3"
             Command="{Binding RenameProfileCommand}"
-            CommandParameter="{Binding Text, ElementName=cbUserProfile}"
             Content="_Rename" />
         <Button
             Grid.Row="0"

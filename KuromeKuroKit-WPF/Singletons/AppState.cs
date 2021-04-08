@@ -1,6 +1,7 @@
 ﻿using KuromeKuroKit_WPF.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,21 +23,85 @@ namespace KuromeKuroKit_WPF.Singletons
             FoundedProfileInfos = new List<ProfileInfo>();
         }
 
+
+        public event EventHandler FoundedProfileInfosChanged;
+
+
+
+
+        public event EventHandler UsingProfileChanged;
+
+        protected virtual void OnUsingProfileChanged()
+        {
+            UsingProfileChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected virtual void OnFoundedProfileInfosChanged()
+        {
+            FoundedProfileInfosChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         [Newtonsoft.Json.JsonIgnore]
         public UserProfile UsingProfile
         {
             get => usingProfile;
-            set 
+            set
             {
+                if (FoundedProfileInfos.Count >= 1)
+                {
+                    if (value != null)
+                    {
+                        int idx = -1;
+
+                        try
+                        {
+                            idx = FoundedProfileInfos.Select((v, i) => new
+                            {
+                                o = v,
+                                Index = i
+                            }).First(x => x.o.Name == value.ProfileName).Index;
+                        }
+                        catch (InvalidOperationException opEx)
+                        {}
+
+                        if (idx > -1)
+                        {
+                            UsingProfileInfoIndex = idx;
+                        }
+                        else
+                        {
+                            throw new Exception("只能設定 FoundedUserInfos 存在的 UsingProfile。");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Cannot set using profile to null.");
+                    }
+                }
+
                 usingProfile = value;
-                usingProfileName = usingProfile.ProfileName;
-            } 
+                usingProfileName = value.ProfileName;
+                OnUsingProfileChanged();
+            }
         }
-        public ProfileInfo UsingProfileInfo => new ProfileInfo 
+
+        [Newtonsoft.Json.JsonIgnore]
+        public ProfileInfo UsingProfileInfo
         {
-            Filename = System.Uri.EscapeDataString(usingProfileName) + ".cfg",
-            Name = usingProfileName
-        };
+            get 
+            {
+                if (usingProfileName == null)
+                {
+                    return null;
+                }
+
+                return new ProfileInfo
+                {
+                    Filename = System.Uri.EscapeDataString(usingProfileName) + ".cfg",
+                    Name = usingProfileName
+                };
+            }
+        }
 
         [Newtonsoft.Json.JsonIgnore]
         public List<ProfileInfo> FoundedProfileInfos { get; set; }
@@ -44,6 +109,9 @@ namespace KuromeKuroKit_WPF.Singletons
         #region Json
         [Newtonsoft.Json.JsonProperty]
         private string usingProfileName;
+
+        [Newtonsoft.Json.JsonIgnore]
+        public int UsingProfileInfoIndex { get; private set; }
         #endregion
         private UserProfile usingProfile;
 
@@ -93,7 +161,12 @@ namespace KuromeKuroKit_WPF.Singletons
                     {
                         UsingProfile = null;
                     }
+                    catch(Exception ex)
+                    {
+                        UsingProfile = null;
+                    }
                 }
+                OnUsingProfileChanged();
             }
 
             if (UsingProfile == null)
@@ -103,20 +176,31 @@ namespace KuromeKuroKit_WPF.Singletons
                  _ = SaveUsingUserProfile();
             }
 
+            FindProfileInfos();
+
+        }
+
+        public void FindProfileInfos()
+        {
+            FoundedProfileInfos.Clear();
+
             var uFs = Directory.EnumerateFiles(pathConfigDir, "*", SearchOption.TopDirectoryOnly)
-                .Where(x=> x.EndsWith(".cfg"));
+                .Where(x => x.EndsWith(".cfg"));
             foreach (var uF in uFs)
             {
                 string name = Path.GetFileNameWithoutExtension(uF);
                 string filename = name + ".cfg";
 
-                FoundedProfileInfos.Add(new ProfileInfo 
+                FoundedProfileInfos.Add(new ProfileInfo
                 {
                     Filename = filename,
                     Name = System.Uri.UnescapeDataString(name)
                 });
             }
 
+            FoundedProfileInfos = FoundedProfileInfos.OrderBy(x => x.Name).ToList();
+
+            OnFoundedProfileInfosChanged();
         }
 
         public bool LoadUserProfile(ProfileInfo usingProfileInfo)
@@ -138,6 +222,66 @@ namespace KuromeKuroKit_WPF.Singletons
             return true;
         }
 
+        public bool DeleteUserProfile(string profileName)
+        {
+            string jsonPath = Path.Combine(pathConfigDir, GetFilename(profileName));
+            if (!File.Exists(jsonPath))
+            {
+                Debug.WriteLine("Found no profile match the given filename.");
+                return false;
+            }
+
+            bool isLoadSucceed;
+
+            if (UsingProfileInfo.Name == profileName)
+            {
+                if (UsingProfileInfoIndex == FoundedProfileInfos.Count - 1)
+                {
+                    isLoadSucceed = LoadUserProfile(FoundedProfileInfos[0]);
+                }
+                else
+                {
+                    isLoadSucceed = LoadUserProfile(FoundedProfileInfos[UsingProfileInfoIndex + 1]);
+                }
+            }
+            else
+            {
+                isLoadSucceed = true;
+            }
+            
+            if (!isLoadSucceed)
+            {
+                Debug.WriteLine("It didn't load successfully.");
+                return false;
+            }
+
+            try
+            {
+                File.Delete(jsonPath);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return false;
+            }
+
+            try
+            {
+                FindProfileInfos();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return false;
+            }
+            return true;
+        }
+
+        public string GetFilename(string profileName)
+        {
+            return System.Uri.EscapeDataString(profileName) + ".cfg";
+        }
+
         public bool SaveAppState()
         {
             string appJsonBody = Newtonsoft.Json.JsonConvert.SerializeObject(this);
@@ -148,6 +292,25 @@ namespace KuromeKuroKit_WPF.Singletons
                 return true;
             }
             catch
+            {
+                return false;
+            }
+        }
+
+        public bool CreateNewProfile(string newProfileName)
+        {
+            try
+            {
+                var oriP = UsingProfile;
+                var newP = new UserProfile();
+                newP.CopyFrom(oriP);
+                newP.ProfileName = newProfileName;
+                FoundedProfileInfos.Add(new ProfileInfo { Name = newProfileName, Filename = GetFilename(newProfileName) });
+                FoundedProfileInfos = FoundedProfileInfos.OrderBy(x => x.Name).ToList();
+                UsingProfile = newP;
+                return SaveUsingUserProfile();
+            }
+            catch (Exception ex)
             {
                 return false;
             }
@@ -179,11 +342,20 @@ namespace KuromeKuroKit_WPF.Singletons
             }
             try
             {
+                string newFilePath = Path.Combine(pathConfigDir, System.Uri.EscapeDataString(newName) + ".cfg");
+
                 File.Move(
                 Path.Combine(pathConfigDir, UsingProfileInfo.Filename),
-                Path.Combine(pathConfigDir, System.Uri.EscapeDataString(newName) + ".cfg"));
-                
+                newFilePath);
+
+                var readFromFile = Newtonsoft.Json.JsonConvert.DeserializeObject<UserProfile>(File.ReadAllText(newFilePath));
+                readFromFile.ProfileName = newName;
+                string writeToFile = Newtonsoft.Json.JsonConvert.SerializeObject(readFromFile);
+                File.WriteAllText(newFilePath, writeToFile);
                 UsingProfile.ProfileName = newName;
+                usingProfileName = newName;
+
+                OnFoundedProfileInfosChanged();
                 return true;
             }
             catch (Exception ex)

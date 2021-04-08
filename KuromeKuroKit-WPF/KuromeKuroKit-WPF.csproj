@@ -162,6 +162,7 @@
     <Resource Include="WebDocumentation.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Extensions\" />
     <Folder Include="Resources\" />
     <Folder Include="Views\Dialogs\" />
   </ItemGroup>
