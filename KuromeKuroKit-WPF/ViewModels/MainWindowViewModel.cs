@@ -1,14 +1,17 @@
-﻿using KuromeKuroKit_WPF.Singletons;
+﻿using KuromeKuroKit_WPF.Properties;
+using KuromeKuroKit_WPF.Singletons;
 using MahApps.Metro.Controls.Dialogs;
 using Prism.Commands;
 using Prism.Ioc;
 using Prism.Mvvm;
 using Prism.Regions;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using WPFLocalizeExtension.Engine;
 
 namespace KuromeKuroKit_WPF.ViewModels
 {
@@ -16,8 +19,75 @@ namespace KuromeKuroKit_WPF.ViewModels
     {
         public MainWindowViewModel(IContainerExtension containerProvider) : base(containerProvider)
         {
+            //System.ComponentModel.PropertyChangedEventHandler pp = (pps, ppe) =>
+            //{
+            //    if (ppe.PropertyName == "HasUnsavedChanges")
+            //    {
+            //        UpdateWindowsTitle();
+            //    }
+            //};
+            UserProfile.PropertyValueChangedEventHandler pp = (pps, ppe) =>
+            {
+                if (ppe.PropertyName == "HasUnsavedChanges")
+                {
+                    return;
+                }
+                appState.UsingProfile.HasUnsavedChanges = true;
+                UpdateWindowsTitle();
+            };
+
             mahDialogCoordinator = containerProvider.Resolve<IDialogCoordinator>();
             appState = containerProvider.Resolve<AppState>();
+            // Strings.Culture = CultureInfo.GetCultureInfo("zh-TW");// CultureInfo.CurrentUICulture;
+
+            
+            appState.UsingProfileChanged += (s, e) =>
+            {
+                if (appState.UsingProfile != null)
+                {
+                    var ci = appState.UsingProfile.GetCultureInfo();
+                    LocalizeDictionary.Instance.Culture = ci;
+                    UpdateWindowsTitle();
+                }
+
+                if (appState.UsingProfile != null)
+                {
+                    // appState.UsingProfile.PropertyChanged += pp;
+                    appState.UsingProfile.PropertyValueChanged += pp;
+                }
+            };
+
+            appState.UsingProfileChanging += (s, e) =>
+            {
+                if (appState.UsingProfile != null)
+                {
+                    // appState.UsingProfile.PropertyChanged -= pp;
+                }
+            };
+
+            appState.UnsavedChangesAppeared += (s, e) => 
+            {
+                if (appState.IsInitialized)
+                {
+                    UpdateWindowsTitle();
+                }
+            };
+        }
+
+        private void UpdateWindowsTitle()
+        {
+            if (!appState.IsInitialized)
+            {
+                return;
+            }
+
+
+            Title = 
+                (appState.HasUnsavedChanges ? "*" : string.Empty) +
+                Strings._MainWindowsTitle + " - " +
+                (appState.UsingProfile.HasUnsavedChanges ? "*" : string.Empty) +
+                appState.UsingProfile.ProfileName;
+
         }
 
         private string title = "KuromeKuro Kit";

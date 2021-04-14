@@ -20,14 +20,15 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="150" />
+            <ColumnDefinition Width="162" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="50" />
-            <ColumnDefinition Width="50" />
-            <ColumnDefinition Width="50" />
+            <ColumnDefinition Width="54" />
+            <ColumnDefinition Width="54" />
+            <ColumnDefinition Width="54" />
         </Grid.ColumnDefinitions>
 
         <Label
@@ -81,6 +82,37 @@
             Command="{Binding BrowseCSGORootCommand}"
             Content="{lex:Loc _Word_Browse}" />
         <!--#endregion-->
+        <Label
+            Grid.Row="2"
+            Grid.Column="0"
+            Content="_Language" />
+        <ComboBox
+            Grid.Row="2"
+            Grid.Column="1"
+            Grid.ColumnSpan="3"
+            ItemsSource="{Binding AvailableLanguages}"
+            SelectedItem="{Binding SelectedLanguage}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock>
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0}　　{1}">
+                                <Binding Path="DisplayName" />
+                                <Binding Path="NativeName" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Button
+            Grid.Row="2"
+            Grid.Column="4"
+            Command="{Binding SetLanguageCommand}"
+            CommandParameter="system"
+            Content="{lex:Loc _Word_Default}" />
+
+
         <UserControl mdlg:DialogParticipation.Register="{Binding}" />
     </Grid>
 </UserControl>

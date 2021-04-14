@@ -117,4 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="lblCSGORootDir_Content" xml:space="preserve">
+    <value>CSGO's directory</value>
+  </data>
+  <data name="_Msg_AnErrorOccurred" xml:space="preserve">
+    <value>An error occurred.</value>
+  </data>
+  <data name="_Msg_CSGONotFounded" xml:space="preserve">
+    <value>"csgo.exe" not founded! Please locate the valid folder, otherwise cancel the operation.</value>
+  </data>
+  <data name="_Word_Browse" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="lblPlayerMdlPath_Content" xml:space="preserve">
+    <value>Player Model Path</value>
+  </data>
+  <data name="_Word_Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="_Word_DisplayLanguage" xml:space="preserve">
+    <value>Display language</value>
+  </data>
+  <data name="_Language_zh-TW" xml:space="preserve">
+    <value>Mandarin Chinese (Taiwan)</value>
+  </data>
+  <data name="_Language_ja-JP" xml:space="preserve">
+    <value>Japanese</value>
+  </data>
+  <data name="_Language_en" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="_MainWindowsTitle" xml:space="preserve">
+    <value>Kuromekuro Kit</value>
+  </data>
 </root>

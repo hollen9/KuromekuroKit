@@ -78,5 +78,16 @@ namespace KuromeKuroKit_WPF.Views
             e.Cancel = true;
             viewModel.ExitCommand.Execute(null);
         }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            var hwndSource = PresentationSource.FromVisual(this) as System.Windows.Interop.HwndSource;
+
+            if (hwndSource != null)
+            {
+                hwndSource.CompositionTarget.RenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
+            }
+            base.OnSourceInitialized(e);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using KuromeKuroKit_WPF.Models;
+using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,10 +13,13 @@ namespace KuromeKuroKit_WPF.Singletons
 {
     public class AppState
     {
+        public static List<AppState> inss = new List<AppState>();
+
         private readonly string filename;
 
         public AppState()
         {
+            inss.Add(this);
             filename = "app.json";
             pathConfigDir = Path.Combine(App.RootFolder, ".config");
             pathAppJson = Path.Combine(pathConfigDir, filename);
@@ -23,11 +27,30 @@ namespace KuromeKuroKit_WPF.Singletons
             FoundedProfileInfos = new List<ProfileInfo>();
         }
 
+        public event EventHandler UnsavedChangesAppeared;
+        public bool HasUnsavedChanges
+        {
+            get => hasUnsavedChanges; 
+            set
+            {
+                hasUnsavedChanges = value;
+                OnUnsavedChangesAppeared();
+            }
+        }
+
+        protected virtual void OnUnsavedChangesAppeared()
+        {
+            UnsavedChangesAppeared?.Invoke(this, EventArgs.Empty);
+        }
+
 
         public event EventHandler FoundedProfileInfosChanged;
+        public event EventHandler UsingProfileChanging;
 
-
-
+        protected virtual void OnUsingProfileChanging()
+        {
+            UsingProfileChanging?.Invoke(this, EventArgs.Empty);
+        }
 
         public event EventHandler UsingProfileChanged;
 
@@ -62,7 +85,7 @@ namespace KuromeKuroKit_WPF.Singletons
                             }).First(x => x.o.Name == value.ProfileName).Index;
                         }
                         catch (InvalidOperationException opEx)
-                        {}
+                        { }
 
                         if (idx > -1)
                         {
@@ -79,26 +102,30 @@ namespace KuromeKuroKit_WPF.Singletons
                     }
                 }
 
+                OnUsingProfileChanging();
                 usingProfile = value;
-                usingProfileName = value.ProfileName;
+                UsingProfileName = value.ProfileName;
                 OnUsingProfileChanged();
             }
         }
 
         [Newtonsoft.Json.JsonIgnore]
+        public bool IsInitialized { get; set; }
+
+        [Newtonsoft.Json.JsonIgnore]
         public ProfileInfo UsingProfileInfo
         {
-            get 
+            get
             {
-                if (usingProfileName == null)
+                if (UsingProfileName == null)
                 {
                     return null;
                 }
 
                 return new ProfileInfo
                 {
-                    Filename = System.Uri.EscapeDataString(usingProfileName) + ".cfg",
-                    Name = usingProfileName
+                    Filename = System.Uri.EscapeDataString(UsingProfileName) + ".cfg",
+                    Name = UsingProfileName
                 };
             }
         }
@@ -108,13 +135,17 @@ namespace KuromeKuroKit_WPF.Singletons
 
         #region Json
         [Newtonsoft.Json.JsonProperty]
-        private string usingProfileName;
+        private string UsingProfileName { get; set; }
+        //private void SetUsingProfileName(string name)
+        //{
+        //    usingProfileName = name;
+        //}
 
         [Newtonsoft.Json.JsonIgnore]
         public int UsingProfileInfoIndex { get; private set; }
         #endregion
         private UserProfile usingProfile;
-
+        private bool hasUnsavedChanges;
         private readonly string pathConfigDir;
         private readonly string pathAppJson;
 
@@ -143,25 +174,26 @@ namespace KuromeKuroKit_WPF.Singletons
             // 將讀取的應用程式 Fields，Deep Copy 到當前的 Instance。
             if (loadedState != null)
             {
-                this.usingProfileName = loadedState.usingProfileName;
+                this.UsingProfileName = loadedState.UsingProfileName;
             }
 
-            if (usingProfileName != null)
+            if (UsingProfileName != null)
             {
-                string encodedSafeProfileName = System.Uri.EscapeDataString(usingProfileName);
+                string encodedSafeProfileName = System.Uri.EscapeDataString(UsingProfileName);
                 string pathUserProfileJson = Path.Combine(pathConfigDir, encodedSafeProfileName + ".cfg");
                 if (File.Exists(pathUserProfileJson))
                 {
                     string jsonBody = File.ReadAllText(pathUserProfileJson);
                     try
                     {
+                        OnUsingProfileChanging();
                         UsingProfile = Newtonsoft.Json.JsonConvert.DeserializeObject<UserProfile>(jsonBody);
                     }
                     catch (Newtonsoft.Json.JsonReaderException jrEx)
                     {
                         UsingProfile = null;
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         UsingProfile = null;
                     }
@@ -173,11 +205,12 @@ namespace KuromeKuroKit_WPF.Singletons
             {
                 // 找不到使用者設定或是無效，所以採用預設的使用者設定。
                 UsingProfile = UserProfile.GetDefaultProfile();
-                 _ = SaveUsingUserProfile();
+                _ = SaveUsingUserProfile();
             }
 
             FindProfileInfos();
 
+            IsInitialized = true;
         }
 
         public void FindProfileInfos()
@@ -248,7 +281,7 @@ namespace KuromeKuroKit_WPF.Singletons
             {
                 isLoadSucceed = true;
             }
-            
+
             if (!isLoadSucceed)
             {
                 Debug.WriteLine("It didn't load successfully.");
@@ -320,7 +353,7 @@ namespace KuromeKuroKit_WPF.Singletons
         {
             string userJsonBody = Newtonsoft.Json.JsonConvert.SerializeObject(this.UsingProfile);
 
-            string encodedSafeProfileName = System.Uri.EscapeDataString(usingProfileName);
+            string encodedSafeProfileName = System.Uri.EscapeDataString(UsingProfileName);
             string pathUserProfileJson = Path.Combine(pathConfigDir, encodedSafeProfileName + ".cfg");
 
             try
@@ -353,8 +386,10 @@ namespace KuromeKuroKit_WPF.Singletons
                 string writeToFile = Newtonsoft.Json.JsonConvert.SerializeObject(readFromFile);
                 File.WriteAllText(newFilePath, writeToFile);
 
+
+                OnUsingProfileChanging();
                 UsingProfile.ProfileName = newName;
-                usingProfileName = newName;
+                UsingProfileName = newName;
                 FindProfileInfos();
                 OnUsingProfileChanged();
                 return true;
@@ -363,6 +398,11 @@ namespace KuromeKuroKit_WPF.Singletons
             {
                 return false;
             }
+        }
+
+        public void DetectSystemLanguage()
+        {
+
         }
     }
 }

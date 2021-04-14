@@ -58,6 +58,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Helpers\TypeHelper.cs" />
+    <Compile Include="Models\MyCultureInfo.cs" />
     <Compile Include="Models\ProfileInfo.cs" />
     <Compile Include="Modules\MainSubModule.cs" />
     <Compile Include="Names.cs" />
@@ -81,7 +82,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Localization\TranslateExtension.cs" />
-    <Compile Include="Strings.Designer.cs">
+    <Compile Include="Properties\Strings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Strings.resx</DependentUpon>
@@ -115,15 +116,15 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Strings.ja-JP.resx">
+    <EmbeddedResource Include="Properties\Strings.ja-JP.resx">
       <SubType>Designer</SubType>
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Strings.zh-TW.resx">
+    <EmbeddedResource Include="Properties\Strings.zh-TW.resx">
       <SubType>Designer</SubType>
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Strings.resx">
+    <EmbeddedResource Include="Properties\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>

@@ -14,6 +14,9 @@ using System.Windows;
 using System.Windows.Input;
 using KuromeKuroKit_WPF.Singletons;
 using System.Threading.Tasks;
+using System.Globalization;
+using KuromeKuroKit_WPF.Properties;
+using WPFLocalizeExtension.Engine;
 
 namespace KuromeKuroKit_WPF.ViewModels
 {
@@ -24,29 +27,45 @@ namespace KuromeKuroKit_WPF.ViewModels
             mahDialogCoordinator = cp.Resolve<IDialogCoordinator>();
             appState = cp.Resolve<AppState>();
 
-            ProfileInfos = new ObservableCollection<ProfileInfo>(appState.FoundedProfileInfos);
-            ProfileInfos.Insert(0, new ProfileInfo { Filename = null, Name = "Add new..." });
-
+            InvokeRegenerateProfileInfos(null);
 
             UsingProfileInfo = appState.UsingProfile == null ? null :
                 ProfileInfos.Where(x => x.Filename == appState.UsingProfileInfo.Filename).FirstOrDefault();
-            //if (UsingProfileInfo == null && ProfileInfos.Count == 1)
-            //{
-            //    ProfileInfos.Add(appState.UsingProfileInfo);
-            //    UsingProfileInfo = ProfileInfos[1];
-            //}
+
+            LoadAvailableLanguages();
 
             appState.FoundedProfileInfosChanged += (s, e) =>
             {
-                ProfileInfos = new ObservableCollection<ProfileInfo>(appState.FoundedProfileInfos);
-                UsingProfileInfo = ProfileInfos[appState.UsingProfileInfoIndex];
-                ProfileInfos.Insert(0, new ProfileInfo { Filename = null, Name = "Add new..." });
+                InvokeRegenerateProfileInfos(() => { UsingProfileInfo = ProfileInfos[appState.UsingProfileInfoIndex]; });
             };
             appState.UsingProfileChanged += (s, e) =>
             {
-                ProfileInfos = new ObservableCollection<ProfileInfo>(appState.FoundedProfileInfos);
-                UsingProfileInfo = ProfileInfos[appState.UsingProfileInfoIndex];
+                InvokeRegenerateProfileInfos(() => { UsingProfileInfo = ProfileInfos[appState.UsingProfileInfoIndex]; });
+                ExecuteSetLanguageCommand(appState.UsingProfile.LanguageCode);
             };
+        }
+
+        void LoadAvailableLanguages()
+        {
+            var listMCI = new List<MyCultureInfo>
+            {
+                new MyCultureInfo("en-US"),
+                new MyCultureInfo("ja-JP"),
+                new MyCultureInfo("zh-TW")
+            };
+            listMCI = listMCI.OrderBy(x => x.DisplayName).ToList();
+            listMCI.Insert(0, new MyCultureInfo());
+
+            AvailableLanguages = new ObservableCollection<MyCultureInfo>(listMCI);
+            listMCI = null;
+            //Strings.ResourceManager.GetString()
+        }
+
+        void InvokeRegenerateProfileInfos(Action middleAction)
+        {
+            ProfileInfos = new ObservableCollection<ProfileInfo>(appState.FoundedProfileInfos);
+            middleAction?.Invoke();
+            ProfileInfos.Insert(0, new ProfileInfo { Filename = null, Name = "Add new..." });
         }
 
         protected override void OnPropertyChanged(PropertyChangedEventArgs args)
@@ -59,11 +78,31 @@ namespace KuromeKuroKit_WPF.ViewModels
                 {
                     if (UsingProfileInfo != null && UsingProfileInfo.Filename != null)
                     {
-                        if (!appState.LoadUserProfile(UsingProfileInfo))
+                        if (appState.LoadUserProfile(UsingProfileInfo))
+                        {
+                            appState.HasUnsavedChanges = true;
+                        }
+                        else
                         {
                             Task.Run(async () => _ = await mahDialogCoordinator.ShowMessageAsync(this, "_Error", "Cannot load selected profile."));
                         }
                     }
+                }
+            }
+            else
+            {
+
+            }
+
+            if (args.PropertyName == "SelectedLanguage")
+            {
+                if (SelectedLanguage.IsFakeOption)
+                {
+                    ExecuteSetLanguageCommand("system");
+                }
+                else if (LocalizeDictionary.Instance.Culture.Name != SelectedLanguage.NowCultureInfo.Name)
+                {
+                    ExecuteSetLanguageCommand(SelectedLanguage.NowCultureInfo.Name);
                 }
             }
         }
@@ -74,6 +113,20 @@ namespace KuromeKuroKit_WPF.ViewModels
             set { SetProperty(ref logMsg, value); }
         }
 
+        private ObservableCollection<MyCultureInfo> availableLanguages;
+        public ObservableCollection<MyCultureInfo> AvailableLanguages
+        {
+            get { return availableLanguages; }
+            set { SetProperty(ref availableLanguages, value); }
+        }
+
+        private MyCultureInfo selectedLanguage;
+        public MyCultureInfo SelectedLanguage
+        {
+            get { return selectedLanguage; }
+            set { SetProperty(ref selectedLanguage, value); }
+        }
+
         private readonly IDialogCoordinator mahDialogCoordinator;
         private readonly AppState appState;
 
@@ -81,7 +134,15 @@ namespace KuromeKuroKit_WPF.ViewModels
 
         public async Task InitializeAsync()
         {
-
+            if (appState.UsingProfile.LanguageCode == "system")
+            {
+                SelectedLanguage = AvailableLanguages[0];
+            }
+            else
+            {
+                SetLanguageCommand.Execute(appState.UsingProfile.LanguageCode);
+            }
+            // ExecuteSetLanguageCommand(appState.UsingProfile.LanguageCode);
 
             isInitialized = true;
         }
@@ -93,7 +154,56 @@ namespace KuromeKuroKit_WPF.ViewModels
 
         //public string PlayerMdlInputPath { get => playerMdlInputPath; set => SetProperty(ref playerMdlInputPath, value); }
 
+        private DelegateCommand<string> setLanguageCommand;
+        public DelegateCommand<string> SetLanguageCommand =>
+            setLanguageCommand ?? (setLanguageCommand = new DelegateCommand<string>(ExecuteSetLanguageCommand));
 
+        void ExecuteSetLanguageCommand(string parameter)
+        {
+            MyCultureInfo ct = new MyCultureInfo(parameter);
+            if (parameter == "system")
+            {
+                SelectedLanguage = AvailableLanguages[0];
+                appState.UsingProfile.LanguageCode = parameter;
+                LocalizeDictionary.Instance.Culture = ct.NowCultureInfo;
+            }
+            else
+            {
+                
+
+                int indexOf = AvailableLanguages.Skip(1).Select((value, index) => new { value, index })
+                        .Where(pair => pair.value.NowCultureInfo.Parent.Name == ct.NowCultureInfo.Parent.Name)
+                        .Select(pair => pair.index + 1)
+                        .FirstOrDefault() - 1;
+                if (indexOf >= 0)
+                {
+                    SelectedLanguage = AvailableLanguages[indexOf + 1];
+                    appState.UsingProfile.LanguageCode = parameter;
+                    LocalizeDictionary.Instance.Culture = ct.NowCultureInfo;
+                    // SelectedLanguage = ct;
+                }
+                else
+                {
+                    Task.Run(async () => _ = await mahDialogCoordinator.ShowMessageAsync(this, "_Error", "Cannot load selected language."));//*
+                }
+            }
+
+            // if (AvailableLanguages[0].IsFakeOption )
+
+            
+
+            //if (AvailableLanguages.Skip(1).Any(x => x.NowCultureInfo.Parent.Name == ct.NowCultureInfo.Parent.Name))
+            //{
+            //    appState.UsingProfile.LanguageCode = parameter;
+            //    LocalizeDictionary.Instance.Culture = ct.NowCultureInfo;
+            //    // Strings.Culture = ct.NowCultureInfo;
+            //    SelectedLanguage = ct;
+            //}
+            //else
+            //{
+            //    Task.Run(async () => _ = await mahDialogCoordinator.ShowMessageAsync(this, "_Error", "Cannot load selected language."));//*
+            //}
+        }
 
         public ICommand BrowseCSGORootCommand => new DelegateCommand(() =>
         {
@@ -120,7 +230,44 @@ namespace KuromeKuroKit_WPF.ViewModels
             } while (true);
         });
 
-        public ICommand DeleteProfileCommand => new DelegateCommand<string>(async profileName => 
+        private DelegateCommand saveProfileCommand;
+        public DelegateCommand SaveProfileCommand =>
+            saveProfileCommand ?? (saveProfileCommand = new DelegateCommand(async () =>
+            {
+                var cts = new System.Threading.CancellationTokenSource();
+                if (appState.SaveUsingUserProfile())
+                {
+                    //System.Timers.Timer t = new System.Timers.Timer(1000);
+                    //int sec = 3;
+                    //t.Elapsed += (s, e) =>
+                    //{
+                    //    if (sec <= 0)
+                    //    {
+                    //        cts.Cancel();
+                    //        t.Stop();
+                    //        t.Dispose();
+                    //    }
+                    //    else
+                    //    {
+                    //        sec--;
+                    //    }
+                    //};
+
+                    //t.Start();
+                    //_ = await mahDialogCoordinator.ShowMessageAsync(this, "_Save", "儲存成功" + sec, MessageDialogStyle.Affirmative, new MetroDialogSettings
+                    //{
+                    //    CancellationToken = cts.Token
+                    //});
+                }
+                else
+                {
+                    _ = await mahDialogCoordinator.ShowMessageAsync(this, "_Save Err", "儲存失敗");
+                }
+            }));
+
+
+
+        public ICommand DeleteProfileCommand => new DelegateCommand<string>(async profileName =>
         {
             if (ProfileInfos.Count >= 2)
             {
@@ -130,12 +277,6 @@ namespace KuromeKuroKit_WPF.ViewModels
             {
                 MessageBox.Show("無法刪除最後一個 Profile。");
             }
-        });
-
-        public ICommand SaveProfileCommand => new DelegateCommand<string>(async profileName =>
-        {
-            // MessageBox.Show(profileName);
-            await mahDialogCoordinator.ShowMessageAsync(this, "Header", profileName);
         });
 
         public ICommand RenameProfileCommand => new DelegateCommand(async () =>

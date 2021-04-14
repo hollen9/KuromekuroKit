@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Prism.Mvvm;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,48 +16,105 @@ namespace KuromeKuroKit_WPF.Singletons
         private string cSGOGameDir;
         private string languageCode;
 
+        public UserProfile()
+        {
+        }
+
+        public event PropertyValueChangedEventHandler PropertyValueChanged;
+
+        public delegate void PropertyValueChangedEventHandler(object sender, PropertyValueChangedEventArgs e);
+
+        private void OnPropertyValueChanged(string propertyName, object oldValue, object newValue)
+        {
+            PropertyValueChanged?.Invoke(this, new PropertyValueChangedEventArgs(propertyName, oldValue, newValue));
+        }
+
+        void SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null) 
+        {
+            if (storage == null && value != null ||
+                storage != null && !storage.Equals(value))
+            {
+                OnPropertyValueChanged(propertyName, storage, value);
+            }
+            storage = value;
+        }
+
         public string ProfileName
         {
-            get => profileName; set
+            get { return profileName; }
+            set 
             {
-                profileName = value;
-                isChangesNotSaved = true;
+                SetProperty(ref profileName, value);
             }
         }
+
+        //public string ProfileName
+        //{
+        //    get => profileName; set
+        //    {
+        //        profileName = value;
+        //        HasUnsavedChanges = true;
+        //    }
+        //}
         public string CSGOGameDir
         {
             get => cSGOGameDir; set
             {
-                cSGOGameDir = value;
-                isChangesNotSaved = true;
+                SetProperty(ref cSGOGameDir, value);
             }
         }
         public string LanguageCode
         {
             get => languageCode; set
             {
-                languageCode = value;
-                isChangesNotSaved = true;
+                SetProperty(ref languageCode, value);
             }
         }
 
-        private bool isChangesNotSaved;
+        [Newtonsoft.Json.JsonIgnore]
+        public bool HasUnsavedChanges { get; set; }
 
         public static UserProfile GetDefaultProfile()
         {
             var p = new UserProfile
             {
-                ProfileName = "default",
-                LanguageCode = "system"
+                profileName = "default",
+                languageCode = "system"
             };
             return p;
         }
 
+        // public bool IsLanguageDefault => LanguageCode == "system";
+        public CultureInfo GetCultureInfo()
+        {
+            if (LanguageCode == "system")
+            {
+                return CultureInfo.InstalledUICulture;
+            }
+            else
+            {
+                return new CultureInfo(LanguageCode);
+            }
+        }
+
         public void CopyFrom(UserProfile oriUP)
         {
-            this.ProfileName = oriUP.ProfileName;
-            this.CSGOGameDir = oriUP.CSGOGameDir;
-            this.LanguageCode = oriUP.LanguageCode;
+            this.profileName = oriUP.profileName;
+            this.cSGOGameDir = oriUP.cSGOGameDir;
+            this.languageCode = oriUP.languageCode;
         }
+    }
+
+    public class PropertyValueChangedEventArgs : EventArgs
+    {
+        public PropertyValueChangedEventArgs(string propertyName, object oldValue, object newValue)
+        {
+            PropertyName = propertyName;
+            OldValue = oldValue;
+            NewValue = newValue;
+        }
+        public virtual string PropertyName { get; }
+        public virtual object OldValue { get; }
+        public virtual object NewValue { get; }
     }
 }

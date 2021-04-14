@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace KuromeKuroKit_WPF {
+namespace KuromeKuroKit_WPF.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace KuromeKuroKit_WPF {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("KuromeKuroKit_WPF.Strings", typeof(Strings).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("KuromeKuroKit_WPF.Properties.Strings", typeof(Strings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,6 +57,42 @@ namespace KuromeKuroKit_WPF {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to English.
+        /// </summary>
+        internal static string _Language_en {
+            get {
+                return ResourceManager.GetString("_Language_en", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Japanese.
+        /// </summary>
+        internal static string _Language_ja_JP {
+            get {
+                return ResourceManager.GetString("_Language_ja-JP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mandarin Chinese (Taiwan).
+        /// </summary>
+        internal static string _Language_zh_TW {
+            get {
+                return ResourceManager.GetString("_Language_zh-TW", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kuromekuro Kit.
+        /// </summary>
+        internal static string _MainWindowsTitle {
+            get {
+                return ResourceManager.GetString("_MainWindowsTitle", resourceCulture);
             }
         }
         
@@ -84,6 +120,24 @@ namespace KuromeKuroKit_WPF {
         internal static string _Word_Browse {
             get {
                 return ResourceManager.GetString("_Word_Browse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Default.
+        /// </summary>
+        internal static string _Word_Default {
+            get {
+                return ResourceManager.GetString("_Word_Default", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display language.
+        /// </summary>
+        internal static string _Word_DisplayLanguage {
+            get {
+                return ResourceManager.GetString("_Word_DisplayLanguage", resourceCulture);
             }
         }
         
