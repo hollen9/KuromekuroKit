@@ -150,4 +150,7 @@
   <data name="_MainWindowsTitle" xml:space="preserve">
     <value>Kuromekuro Kit</value>
   </data>
+  <data name="MenuModelPatchDisclaimerHtml" xml:space="preserve">
+    <value>&lt;p&gt;&lt;strong&gt;&lt;span style="color: #ff0000;"&gt;We absolutely take no resposibility&lt;/span&gt;&lt;/strong&gt; for any consequences of being &lt;span style="color: #ff0000;"&gt;&lt;strong&gt;VAC banned&lt;/strong&gt;&lt;/span&gt; by using this software.&lt;br /&gt;After patching the menu character, &lt;strong&gt;&lt;span style="color: #ff0000;"&gt;you will be unable to join any offical matches&lt;/span&gt;&lt;/strong&gt;, except for VAC-enabled community servers. We have tested playing on &lt;strong&gt;KuromeKuro&lt;/strong&gt;, &lt;strong&gt;UmeSaba&lt;/strong&gt;, &lt;strong&gt;MagicalSaba &lt;/strong&gt;and&lt;strong&gt; Planetia&lt;/strong&gt; without being VAC'd, so &lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;it SHOULD be fine&lt;/span&gt;&lt;/strong&gt; but we will never know when will Valve changes their mind.&lt;br /&gt;Besides, &lt;strong&gt;&lt;span style="color: #ff0000;"&gt;you will see a big error when you launch the game&lt;/span&gt;&lt;/strong&gt;, &lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;but it will goes away&lt;/span&gt;&lt;/strong&gt; after finishing loading map resources.&lt;/p&gt;</value>
+  </data>
 </root>

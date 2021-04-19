@@ -150,4 +150,8 @@
   <data name="_MainWindowsTitle" xml:space="preserve">
     <value>Kuromekuro Kit</value>
   </data>
+  <data name="MenuModelPatchDisclaimerHtml" xml:space="preserve">
+    <value>&lt;p&gt;使用本軟體後若招致 &lt;span style="color: #ff0000;"&gt;&lt;strong&gt;VAC BAN 一概恕不負責！&lt;br /&gt;&lt;/strong&gt;&lt;/span&gt;撤換選單人物之後，你&lt;span style="color: #ff0000;"&gt;&lt;strong&gt;將無法加入任何官方遊戲局&lt;/strong&gt;&lt;/span&gt;，除了有開 VAC 保護的社群伺服器之外。&lt;br /&gt;我們已經在如下伺服器測試過：&lt;strong&gt;KuromeKuro&lt;/strong&gt;、&lt;strong&gt;梅鯖&lt;/strong&gt;、&lt;strong&gt;まじかる鯖、&lt;/strong&gt;&lt;strong&gt;Planetia，&lt;br /&gt;&lt;/strong&gt;所以&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;應該不會有問題&lt;/strong&gt;&lt;/span&gt;，但誰又知道 Valve 何時會改變心意呢？&lt;/p&gt;
+&lt;p&gt;另外，&lt;strong&gt;&lt;span style="color: #ff0000;"&gt;啟動遊戲時會看到一個很大的紅色錯誤&lt;/span&gt;&lt;/strong&gt;，但只要&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;載入地圖資源就能解決&lt;/span&gt;&lt;/strong&gt;。</value>
+  </data>
 </root>

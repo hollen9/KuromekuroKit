@@ -37,8 +37,13 @@
                 Content="基本設定" />
             <Button
                 Command="{Binding NavigateCommand}"
+                CommandParameter="MenuModelPatchSub"
+                Content="選單人物撤換" />
+            <Button
+                Command="{Binding NavigateCommand}"
                 CommandParameter="AboutSub"
-                Content="檢查更新" />
+                Content="版本資訊" />
+
         </StackPanel>
         <ContentControl Grid.Row="1" prism:RegionManager.RegionName="{StaticResource mainRegionName}" />
         <!--<Grid.RowDefinitions>

@@ -57,6 +57,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\HtmlToXamlConverter\HtmlCssParser.cs" />
+    <Compile Include="Converters\HtmlToXamlConverter\HtmlFromXamlConverter.cs" />
+    <Compile Include="Converters\HtmlToXamlConverter\HtmlLexicalAnalyzer.cs" />
+    <Compile Include="Converters\HtmlToXamlConverter\HtmlParser.cs" />
+    <Compile Include="Converters\HtmlToXamlConverter\HtmlSchema.cs" />
+    <Compile Include="Converters\HtmlToXamlConverter\HtmlTokenType.cs" />
+    <Compile Include="Converters\HtmlToXamlConverter\HtmlToXamlConverter.cs" />
     <Compile Include="Helpers\TypeHelper.cs" />
     <Compile Include="Models\MyCultureInfo.cs" />
     <Compile Include="Models\ProfileInfo.cs" />
@@ -64,15 +71,23 @@
     <Compile Include="Names.cs" />
     <Compile Include="Models\UserProfile.cs" />
     <Compile Include="Singletons\AppState.cs" />
+    <Compile Include="ViewModels\MenuModelPatchSubViewModel.cs" />
     <Compile Include="ViewModels\SettingsSubViewModel.cs" />
     <Compile Include="ViewModels\AboutSubViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="Views\AboutSub.xaml.cs">
       <DependentUpon>AboutSub.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\MenuModelPatchSub.xaml.cs">
+      <DependentUpon>MenuModelPatchSub.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SettingsSub.xaml.cs">
       <DependentUpon>SettingsSub.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\MenuModelPatchSub.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

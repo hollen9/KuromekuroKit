@@ -19,6 +19,7 @@ namespace KuromeKuroKit_WPF.Modules
         {
             containerRegistry.RegisterForNavigation<Views.AboutSub>();
             containerRegistry.RegisterForNavigation<Views.SettingsSub>();
+            containerRegistry.RegisterForNavigation<Views.MenuModelPatchSub>();
         }
     }
 }

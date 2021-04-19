@@ -14,6 +14,6 @@
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
     <Grid>
-        <Label Content="Hello" />
+        <RichTextBox x:Name="rtbDis" />
     </Grid>
 </UserControl>

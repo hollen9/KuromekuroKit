@@ -158,5 +158,14 @@ namespace KuromeKuroKit_WPF.Properties {
                 return ResourceManager.GetString("lblPlayerMdlPath_Content", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;p&gt;&lt;strong&gt;&lt;span style=&quot;color: #ff0000;&quot;&gt;We absolutely take no resposibility&lt;/span&gt;&lt;/strong&gt; for any consequences of being &lt;span style=&quot;color: #ff0000;&quot;&gt;&lt;strong&gt;VAC banned&lt;/strong&gt;&lt;/span&gt; by using this software.&lt;br /&gt;After patching the menu character, &lt;strong&gt;&lt;span style=&quot;color: #ff0000;&quot;&gt;you will be unable to join any offical matches&lt;/span&gt;&lt;/strong&gt;, except for VAC-enabled community servers. We have tested playing on &lt;strong&gt;KuromeKuro&lt;/strong&gt;, &lt;strong&gt;UmeSaba&lt;/strong&gt;, &lt;strong&gt;MagicalSaba &lt;/strong&gt;and&lt;st [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string MenuModelPatchDisclaimerHtml {
+            get {
+                return ResourceManager.GetString("MenuModelPatchDisclaimerHtml", resourceCulture);
+            }
+        }
     }
 }
